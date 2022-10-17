@@ -95,4 +95,6 @@ body {
     margin-right: 5px;
     cursor: pointer;
     text-decoration: none;
+}.todo-list-item .strike-through {
+    text-decoration: line-through;
 }

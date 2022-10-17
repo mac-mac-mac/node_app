@@ -2,9 +2,12 @@ var express = require('express');
 var mongoose = require('mongoose');
 const { find } = require('./models/todo.model');
 var app = express();
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json());
 
 app.use('/static', express.static("public"));
-app.use(express.urlencoded({ extended: true }))
 app.set("view engine", "ejs");
 
 const Todo = require('./models/todo.model')
@@ -15,11 +18,17 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, "MongoDb connection error: "))
 
 app.get('/', function(req, res){
-    res.render('todo.ejs');
+    Todo.find(function(err, todo){
+        if(err) {
+            res.json({"Error: ": err})
+        } else {
+            res.render('todo.ejs', {todoList: todo});
+        }
+    })
 })
 
 // Creates item in DB
-app.post('/', (req, res) => {
+app.post('/create', (req, res) => {
     let newTodo = new Todo({
         todo: req.body.content,
         done: false
@@ -28,14 +37,14 @@ app.post('/', (req, res) => {
         if(err){
             res.json({"Error: ": err})
         } else {
-            res.json({"Status: ": "Successful", "ObjectId": todo.id})
+            res.redirect('./');
         }
     })
 })
 
 // Modifies item in DB
-app.put('/', (req, res) => {
-    let id = req.body.check;
+app.put('/done', (req, res) => {
+    let id = req.body.id;
     let err = {}
     if(typeof id === "string"){
         Todo.updateOne({_id: id}, {done: true}, function(error){
@@ -45,7 +54,7 @@ app.put('/', (req, res) => {
         })
     } else if (typeof id === "object") {
         id.forEach( ID => {
-            Todo.updateOne({_id: ID}, {done: true}, function(error){
+            Todo.updateOne({_id: id}, {done: true}, function(error){
                 if(error){
                     err = error
                 }
@@ -55,12 +64,12 @@ app.put('/', (req, res) => {
     if(err){
         res.json({"Error: ": err})
     } else {
-        res.json({"Status: ": "Successful"})
+        res.redirect('./');
     }
 })
 
-app.delete('/', (req, res) => {
-    let id = req.body.check;
+app.delete('/delete/:id', (req, res) => {
+    let id = req.params.id;
     let err = {}
     if(typeof id === "string"){
         Todo.deleteOne({_id: id}, function(error){
@@ -80,7 +89,7 @@ app.delete('/', (req, res) => {
     if(err){
         res.json({"Error: ": err})
     } else {
-        res.json({"Status: ": "Successful"})
+        res.redirect('./');
     }
 })
 

@@ -7,6 +7,37 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- <link href="https://use.fontawesome.com/release/v5.8.2/css/all.css" rel="stylesheet" /> -->
+    <script>
+        function done(todoTag) {
+            const _id = todoTag.getAttribute("data-todoId");
+            console.log(_id)
+            fetch('/done', {
+                method: 'PUT',
+                body: JSON.stringify({ id: `${_id}`}),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error)
+            });
+        }
+
+        function deleteItem(todoTag) {
+            const _id = todoTag.getAttribute("data-todoId");
+            console.log(_id)
+            fetch(`/delete/${_id}`, {
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error)
+            });
+        }
+
+    </script>
 </head>
 <body>
     <div class="todo-container">
@@ -14,24 +45,32 @@
             To-Do Items
         </h2>
         <div class="todo">
-            <form action="/" method="POST" class="todo-header">
+            <form action="/create" method="POST" class="todo-header">
                 <input type="text" name="content" />
                 <button type="submit">
                     <i class="fa fa-plus"></i>
                 </button>
             </form>
             <ul class="todo-list" >
-                <li class="todo-list-item">
-                    <div class="todo-list-item-name">
-                        First task
-                    </div>
-                    <a href="" class="edit" >
-                        <i class="fa fa-pencil"></i>
-                    </a>
-                    <a href="" class="remove" >
-                        <i class="fa fa-times"></i>
-                    </a>
-                </li>
+                <% todoList.forEach(function(todo){ %>
+                    <li class="todo-list-item">
+                        <% if(todo.done) { %>
+                            <div class="todo-list-item-name strike-through">
+                                <%= todo.todo %>
+                            </div>
+                        <% } else { %>
+                            <div class="todo-list-item-name">
+                                <%= todo.todo %>
+                            </div>
+                        <% } %>
+                        <button data-todoId="<%= todo._id %>" class="edit" onClick="done(this)">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button data-todoId="<%= todo._id %>" class="remove" onClick="deleteItem(this)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </li>
+                <% }) %>
             </ul>
         </div>
     </div>
