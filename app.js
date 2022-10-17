@@ -1,5 +1,6 @@
 var express = require('express');
 var mongoose = require('mongoose');
+var axios = require('axios').default;
 const { find } = require('./models/todo.model');
 var app = express();
 const bodyParser = require('body-parser');
@@ -18,6 +19,9 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, "MongoDb connection error: "))
 
 app.get('/', function(req, res){
+    axios.get('https://xkcd.com/info.0.json').then(function(response) {
+        console.log(response)
+    })
     Todo.find(function(err, todo){
         if(err) {
             res.json({"Error: ": err})
